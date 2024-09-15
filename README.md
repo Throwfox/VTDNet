@@ -28,7 +28,7 @@ To get started with **VTDNet**, follow these steps:
    Use the following command to create a new conda environment with the required dependencies:
 
    ```bash
-   conda create --name VTDNet python=3.10.14 pytorch=1.13.1 tqdm=4.66.4 scipy=1.13.1 scikit-learn=1.4.2
+   conda create --name VTDNet python=3.10.14 tqdm=4.66.4 scipy=1.13.1 scikit-learn=1.4.2
    ```
 
 3. **Activate the conda environment**:
@@ -38,7 +38,10 @@ To get started with **VTDNet**, follow these steps:
    ```bash
    conda activate VTDNet
    ```
-
+   Install pytorch with gpu based on the cuda version: here cuda =11.6 as an example.
+   ```bash
+   conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+   ```
 ## Usage
 
 Once the environment is set up, you can use the following commands to generate data, train the model, and test it.
