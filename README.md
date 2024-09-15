@@ -59,7 +59,12 @@ This script will create the synthetic dataset required for model training.
 ### 2. Training the Model
 
 You can train the model using the generated dataset with the following command, task = 6 means generation of synthetic with gamma =0.5 :
-
+ * confounders=1
+ * gamma=0.6
+ * sample_num=5000
+ * length=30
+ * num_covariates=30
+ * num_treatments=3
 ```bash
 python VTD_training.py --dataset=syn --task=5 --cuda=0 --resume=0
 ```
