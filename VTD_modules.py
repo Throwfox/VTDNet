@@ -211,7 +211,7 @@ def loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, ou
         print("Loss contains NaN values")
     return total_loss, recon_loss, kl_loss, treatment_loss, outcome_loss_ori,iptw_losses
 
-def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,alpha, model_save_path,resume):
+def trainer(model, train_loader, val_loader, optimizer, num_epochs,alpha, model_save_path,resume):
     print('model training....',resume)
     if resume==1:
         model.load_state_dict(torch.load(model_save_path))
@@ -327,36 +327,4 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         if mae_val < best_val_mae:
             best_val_mae = mae_val
             torch.save(model.state_dict(), model_save_path)
-            print(f"Model saved at epoch {epoch + 1} with validation mae {mae_val}")
-            
-        # testingset
-        model.eval()
-        all_predicted_outcomes = []
-        all_true_outcomes = []
-        all_masks = []
-        with torch.no_grad():
-            for x, delta_t, treatment, outcome,varing_length,cf1,cf2,cf3 in tqdm(test_loader):
-                x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
-                x_recon, mu, logvar, treatment_pred, outcome_pred = model(x, delta_t,treatment,varing_length)
-                
-                # Create mask based on activate
-                batch_size = x.size(0)
-                sequence_length = x.size(1)
-                mask = torch.arange(sequence_length).expand(batch_size, sequence_length).cuda() < varing_length.unsqueeze(1)
-                mask = mask.unsqueeze(-1).float()  # Expand mask to match outcome dimensions
-                all_predicted_outcomes.append(outcome_pred)
-                all_true_outcomes.append(outcome)
-                all_masks.append(mask)  
-        # Concatenate all outcomes and masks
-        all_predicted_outcomes = torch.cat(all_predicted_outcomes, dim=0)
-        all_true_outcomes = torch.cat(all_true_outcomes, dim=0)
-        all_masks = torch.cat(all_masks, dim=0)
-
-        # Compute RMSE and MAE
-        rmse_test = rmse(all_predicted_outcomes, all_true_outcomes, all_masks)
-        mae_test = mae(all_predicted_outcomes, all_true_outcomes, all_masks)
-        '''
-        wandb.log({'test/rmse': rmse_test.cpu().detach().numpy(),
-          'test/mae': mae_test.cpu().detach().numpy()})'''
-          
-        print(f"Epoch {epoch + 1}, Test rmse: {rmse_test}, Test mae: {mae_test}")                     
+            print(f"Model saved at epoch {epoch + 1} with validation mae {mae_val}")              
