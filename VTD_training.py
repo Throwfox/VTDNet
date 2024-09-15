@@ -32,9 +32,9 @@ def main():
     # Your logic here based on dataset and task
     # hyperparameter
     args.input_dim = 30
-    args.head=4 # 1
-    args.hidden_dim = 256 # 128
-    args.latent_dim = 256 # 128
+    args.head=4 
+    args.hidden_dim = 256 
+    args.latent_dim = 256
     args.output_dim = 1
     args.treatment_dim = 3
     args.length = 30
