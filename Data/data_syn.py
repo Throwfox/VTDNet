@@ -1,5 +1,7 @@
 import numpy as np
 import scipy
+import os
+
 class AutoregressiveSimulation:
     def __init__(self, gamma, num_simulated_hidden_confounders,num_covariates,num_treatments):
         self.num_covariates = num_covariates
