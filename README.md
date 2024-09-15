@@ -6,11 +6,11 @@ This repository contains the implementation of **VTDNet**, a deep learning model
 
 The following software is required to use this repository:
 
-- **Python 3.10.14** (tested with this version)
+- **Python 3.10.14** 
 - **PyTorch 1.13.1**
-- **tqdm 4.66.4** (for progress bars and tracking)
-- **SciPy 1.13.1** (scientific computing library)
-- **scikit-learn 1.4.2** (for various machine learning utilities)
+- **tqdm 4.66.4** 
+- **SciPy 1.13.1** 
+- **scikit-learn 1.4.2** 
 
 ## Installation
 
@@ -45,7 +45,7 @@ Once the environment is set up, you can use the following commands to generate d
 
 ### 1. Generating Synthetic Data
 
-Use the following command to generate synthetic data for training and evaluation:
+Use the following command to generate synthetic data for training and evaluation; the params need to be set within the file:
 
 ```bash
 python ./Data/data_syn.py
@@ -55,7 +55,7 @@ This script will create the synthetic dataset required for model training.
 
 ### 2. Training the Model
 
-You can train the model using the generated dataset with the following command:
+You can train the model using the generated dataset with the following command, task = 6 means generation of synthetic with gamma =0.6 :
 
 ```bash
 python VTD_training.py --dataset=syn --task=6 --cuda=0 --resume=0
@@ -84,24 +84,6 @@ The results will be printed to the console, and relevant metrics such as PEHE an
   
 - **CUDA Support**: By default, the training and inference scripts use GPU acceleration with CUDA. You can specify which GPU to use by adjusting the `--cuda` flag (e.g., `--cuda=0` to use the first GPU).
 
-## Example Workflow
-
-Here is an example of the entire workflow:
-
-1. **Generate synthetic data**:
-   ```bash
-   python ./Data/data_syn.py
-   ```
-
-2. **Train the model**:
-   ```bash
-   python VTD_training.py --dataset=syn --task=6 --cuda=0 --resume=0
-   ```
-
-3. **Test the model**:
-   ```bash
-   python VTD_inference.py --task=6
-   ```
 
 ## Contribution
 
@@ -115,6 +97,6 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 For any questions or issues, please contact:
 
-- **Your Name**
+- **Hao Dai**
 - Email: haodai@ufl.edu
 ```
