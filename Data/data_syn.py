@@ -217,7 +217,7 @@ class AutoregressiveSimulation:
         return dataset
 #params
 confounders=1
-gamma=0.6
+gamma=0.5
 sample_num=5000
 lenth=30
 num_covariates=30
