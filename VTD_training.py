@@ -76,7 +76,7 @@ def train(args):
     model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     
-    trainer(model, train_loader, val_loader,test_loader, optimizer, args.epochs, args.alpha, model_save_path, resume=args.resume)
+    trainer(model, train_loader, val_loader, optimizer, args.epochs, args.alpha, model_save_path, resume=args.resume)
 
 if __name__ == '__main__':
     main()
