@@ -187,8 +187,8 @@ def evaluate_syn(model,dataset_name, test_loader):
     print(f"eATE original: {eate}")
     
     ite_true,ite_true_per_person= ite_mask(ite_true_sample, all_masks)
-    print(f"true ITE original: {ite_true}")
-    print(f"pred ITE original: {ite_val_ori}") 
+    #print(f"true ITE original: {ite_true}")
+    #print(f"pred ITE original: {ite_val_ori}") 
     #
     print(f"RMSE: {rmse_val}")
     print(f"MAE: {mae_val}")
