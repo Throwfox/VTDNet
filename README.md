@@ -38,7 +38,7 @@ To get started with **VTDNet**, follow these steps:
    ```bash
    conda activate VTDNet
    ```
-   Install pytorch with gpu based on the cuda version: here cuda =11.6 as an example. It may take a while, and please be patient.
+   Install pytorch with GPU (encouraged) based on the cuda version: here cuda =11.6 as an example.
    ```bash
    conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
    ```
@@ -83,7 +83,7 @@ The results will be printed to the console, and relevant metrics such as PEHE an
 
 ## Additional Options
 
-- **Checkpointing**: The training script automatically saves model checkpoints during training. If you wish to resume training, you can use the `--resume=1` flag when calling the `VTD_training.py` script.
+- **Checkpointing**: The training script automatically saves model checkpoints during training. To resume training, you can use the `--resume=1` flag when calling the `VTD_training.py` script.
   
 - **CUDA Support**: By default, the training and inference scripts use GPU acceleration with CUDA. You can specify which GPU to use by adjusting the `--cuda` flag (e.g., `--cuda=0` to use the first GPU).
 
