@@ -15,10 +15,10 @@ def ite_calculate(model,x, delta_t,treatment,activate,task):
         treatment_vaso_case= torch.cat((treatment[:,:,0].unsqueeze(-1),treatment_case[:,:,1].unsqueeze(-1)), dim=-1)
         treatment_mech_ctrl= torch.cat((treatment_contrl[:,:,0].unsqueeze(-1),treatment[:,:,1].unsqueeze(-1)), dim=-1)
         treatment_vaso_ctrl= torch.cat((treatment[:,:,0].unsqueeze(-1),treatment_contrl[:,:,1].unsqueeze(-1)), dim=-1)
-        _,_,_,_,_,outcome_pred_mech_case=model(x, delta_t,treatment_mech_case,activate)
-        _,_,_,_,_,outcome_pred_mech_ctrl=model(x, delta_t,treatment_mech_ctrl,activate)
-        _,_,_,_,_,outcome_pred_vaso_case=model(x, delta_t,treatment_vaso_case,activate)
-        _,_,_,_,_,outcome_pred_vaso_ctrl=model(x, delta_t,treatment_vaso_ctrl,activate)
+        _,_,_,_,outcome_pred_mech_case=model(x, delta_t,treatment_mech_case,activate)
+        _,_,_,_,outcome_pred_mech_ctrl=model(x, delta_t,treatment_mech_ctrl,activate)
+        _,_,_,_,outcome_pred_vaso_case=model(x, delta_t,treatment_vaso_case,activate)
+        _,_,_,_,outcome_pred_vaso_ctrl=model(x, delta_t,treatment_vaso_ctrl,activate)
         ite_sub_orginal= torch.cat(((outcome_pred_mech_case-outcome_pred_mech_ctrl),(outcome_pred_vaso_case-outcome_pred_vaso_ctrl)),dim=-1)
     else:
         treatment_1st_case = torch.cat((treatment_case[:,:,0].unsqueeze(-1),treatment[:,:,1].unsqueeze(-1), treatment[:,:,2].unsqueeze(-1)),dim=-1)
@@ -28,12 +28,12 @@ def ite_calculate(model,x, delta_t,treatment,activate,task):
         treatment_2nd_ctrl= torch.cat((treatment[:,:,0].unsqueeze(-1),treatment_contrl[:,:,1].unsqueeze(-1),treatment[:,:,2].unsqueeze(-1)), dim=-1)
         treatment_3th_ctrl= torch.cat((treatment[:,:,0].unsqueeze(-1),treatment[:,:,1].unsqueeze(-1),treatment_contrl[:,:,2].unsqueeze(-1)), dim=-1)
         
-        _,_,_,_,_,outcome_pred_1st_case = model(x, delta_t,treatment_1st_case,activate)
-        _,_,_,_,_,outcome_pred_1st_ctrl = model(x, delta_t,treatment_1st_ctrl,activate)
-        _,_,_,_,_,outcome_pred_2nd_case = model(x, delta_t,treatment_2nd_case,activate)
-        _,_,_,_,_,outcome_pred_2nd_ctrl = model(x, delta_t,treatment_2nd_ctrl,activate)
-        _,_,_,_,_,outcome_pred_3th_case = model(x, delta_t,treatment_3th_case,activate)
-        _,_,_,_,_,outcome_pred_3th_ctrl = model(x, delta_t,treatment_3th_ctrl,activate)        
+        _,_,_,_,outcome_pred_1st_case = model(x, delta_t,treatment_1st_case,activate)
+        _,_,_,_,outcome_pred_1st_ctrl = model(x, delta_t,treatment_1st_ctrl,activate)
+        _,_,_,_,outcome_pred_2nd_case = model(x, delta_t,treatment_2nd_case,activate)
+        _,_,_,_,outcome_pred_2nd_ctrl = model(x, delta_t,treatment_2nd_ctrl,activate)
+        _,_,_,_,outcome_pred_3th_case = model(x, delta_t,treatment_3th_case,activate)
+        _,_,_,_,outcome_pred_3th_ctrl = model(x, delta_t,treatment_3th_ctrl,activate)        
         ite_sub_orginal= torch.cat(((outcome_pred_1st_case-outcome_pred_1st_ctrl),(outcome_pred_2nd_case-outcome_pred_2nd_ctrl),(outcome_pred_3th_case-outcome_pred_3th_ctrl)),dim=-1)    
     return ite_sub_orginal   
     
