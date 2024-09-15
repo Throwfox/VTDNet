@@ -223,4 +223,8 @@ num_treatments=3
 
 autoregressive = AutoregressiveSimulation(gamma, confounders,num_covariates,num_treatments)
 dataset = autoregressive.generate_dataset(sample_num, lenth+1)
+
+# Check if the directory exists, if not, create it
+if not os.path.exists('./syn_data'):
+    os.makedirs('./syn_data')
 np.save('./syn_data/syn_data_gamma_'+str(int(10*gamma))+'.npy',dataset,allow_pickle=True)
