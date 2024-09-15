@@ -219,12 +219,12 @@ class AutoregressiveSimulation:
 confounders=1
 gamma=0.5
 sample_num=5000
-lenth=30
+length=30
 num_covariates=30
 num_treatments=3
 
 autoregressive = AutoregressiveSimulation(gamma, confounders,num_covariates,num_treatments)
-dataset = autoregressive.generate_dataset(sample_num, lenth+1)
+dataset = autoregressive.generate_dataset(sample_num, length+1)
 
 # Check if the directory exists, if not, create it
 if not os.path.exists('./Data/syn_data'):
