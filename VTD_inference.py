@@ -13,7 +13,8 @@ def main():
     
     # Add arguments for dataset and task
     parser.add_argument('--task', type=str, required=True, help='Task to perform')
-
+    parser.add_argument('--model', default='VTD',type=str, required=False, help='model name')
+    
     # Parse the arguments
     args = parser.parse_args()
     if args.task not in ['0','1','2', '3','4','5', '6','7','8' ,'9']:
