@@ -38,7 +38,7 @@ To get started with **VTDNet**, follow these steps:
    ```bash
    conda activate VTDNet
    ```
-   Install pytorch with gpu based on the cuda version: here cuda =11.6 as an example.
+   Install pytorch with gpu based on the cuda version: here cuda =11.6 as an example. It may take a while, and please be patient.
    ```bash
    conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
    ```
