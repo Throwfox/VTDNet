@@ -224,9 +224,7 @@ def trainer(model, train_loader, val_loader, optimizer, num_epochs,alpha, model_
         with torch.no_grad():
             for x, delta_t, treatment, outcome,varing_length,cf1,cf2,cf3 in tqdm(val_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
-                x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
-                loss, _ ,_ , _ , _,_= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,outcome_pred_wtreat,varing_length,alpha)
-                val_loss += loss.item()
+                x_recon, mu, logvar, treatment_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
                 # Create mask based on activate
                 batch_size = x.size(0)
                 sequence_length = x.size(1)
