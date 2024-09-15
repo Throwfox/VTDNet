@@ -49,6 +49,16 @@ class PositionalEncoding(nn.Module):
 
 
 class VTD(nn.Module):
+    '''
+    if samples size: 5000; max length:30; num of covariances:30; num of treatments:3
+    x:covariates (5000, 30, 30)
+    t:treatments (5000, 30, 3)
+    activate:sequence_length (5000,)
+    y:factual_outcomes (5000, 30, 1)
+    cf_outcomes_t1 (5000, 30, 1)
+    cf_outcomes_t2 (5000, 30, 1)
+    cf_outcomes_t3 (5000, 30, 1)
+    '''
     def __init__(self, input_dim, hidden_dim, latent_dim, output_dim, treatment_dim,head,length):
         super(VTD, self).__init__()
         # Embedding layer to transform input_dim to hidden_dim
