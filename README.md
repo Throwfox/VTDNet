@@ -58,10 +58,10 @@ This script will create the synthetic dataset required for model training.
 
 ### 2. Training the Model
 
-You can train the model using the generated dataset with the following command, task = 6 means generation of synthetic with gamma =0.6 :
+You can train the model using the generated dataset with the following command, task = 6 means generation of synthetic with gamma =0.5 :
 
 ```bash
-python VTD_training.py --dataset=syn --task=6 --cuda=0 --resume=0
+python VTD_training.py --dataset=syn --task=5 --cuda=0 --resume=0
 ```
 
 - `--dataset=syn`: Specifies the dataset to use (synthetic in this case).
@@ -77,7 +77,7 @@ Once training is complete, you can evaluate the model using PEHE and eATE metric
 python VTD_inference.py --task=6
 ```
 
-- `--task=6`: Specifies the task for which you want to run the inference.
+- `--task=5`: Specifies the task for which you want to run the inference.
 
 The results will be printed to the console, and relevant metrics such as PEHE and eATE will be computed.
 
