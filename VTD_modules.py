@@ -223,7 +223,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         all_true_outcomes = []
         all_masks = []
         with torch.no_grad():
-            for x, delta_t, treatment, outcome,varing_length in tqdm(val_loader):
+            for x, delta_t, treatment, outcome,varing_length,cf1,cf2,cf3 in tqdm(val_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
                 x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
                 loss, _ ,_ , _ , _,_= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,outcome_pred_wtreat,varing_length,alpha)
@@ -254,7 +254,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         total_loss = 0
         model.train()
         
-        for x, delta_t, treatment, outcome, varing_length in tqdm(train_loader):
+        for x, delta_t, treatment, outcome, varing_length,cf1,cf2,cf3 in tqdm(train_loader):
             x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
             
             optimizer.zero_grad()
@@ -284,7 +284,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         all_true_outcomes = []
         all_masks = []
         with torch.no_grad():
-            for x, delta_t, treatment, outcome,varing_length in tqdm(val_loader):
+            for x, delta_t, treatment, outcome,varing_length,cf1,cf2,cf3 in tqdm(val_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
                 x_recon, mu, logvar, treatment_pred, outcome_pred = model(x, delta_t,treatment,varing_length)
                 loss, _ ,_ , _ , _,_= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,varing_length,alpha)
@@ -335,7 +335,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         all_true_outcomes = []
         all_masks = []
         with torch.no_grad():
-            for x, delta_t, treatment, outcome,varing_length in tqdm(test_loader):
+            for x, delta_t, treatment, outcome,varing_length,cf1,cf2,cf3 in tqdm(test_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
                 x_recon, mu, logvar, treatment_pred, outcome_pred = model(x, delta_t,treatment,varing_length)
                 
