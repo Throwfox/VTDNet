@@ -68,6 +68,8 @@ def train(args):
         },
         reinit=True)
     '''
+    if not os.path.exists('./checkpoints'):
+        os.makedirs('./checkpoints')
     model_save_path = './checkpoints/best_model_'+args.dataset+'_'+args.task+'_'+args.model+'_'+str(args.epochs)+'epoch.pth'  
     model = VTD(args.input_dim, args.hidden_dim, args.latent_dim, args.output_dim, args.treatment_dim, args.head, args.length)
     model.to(device)
