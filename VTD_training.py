@@ -11,6 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description="Manage parameters for different datasets and tasks")
     
     # Add arguments for dataset and task
+    parser.add_argument('--model', default='VTD',type=str, required=False, help='model name')
     parser.add_argument('--dataset', type=str, required=True, choices=['syn'], help='Dataset to use')
     parser.add_argument('--task', type=str, required=True, help='Task to perform')
     parser.add_argument('--cuda', type=str, required=True, help='cuda device')
