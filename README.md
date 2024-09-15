@@ -19,7 +19,7 @@ To get started with **VTDNet**, follow these steps:
 1. **Clone this repository**:
 
    ```bash
-   git clone https://github.com/yourusername/VTDNet.git
+   git clone https://github.com/Throwfox/VTDNet.git
    cd VTDNet
    ```
 
