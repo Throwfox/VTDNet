@@ -1,6 +1,6 @@
 # VTDNet
 
-This repository contains the implementation of **VTDNet**, a deep learning model implemented using **PyTorch**. The project includes various utilities for generating synthetic data, training the model, and evaluating its performance using metrics such as PEHE (Precision in Estimation of Heterogeneous Effect) and eATE (expected Average Treatment Effect).
+This repository contains the implementation of **Variational Temporal Deconfounder Network (VTDNet)**, a deep learning model implemented using **PyTorch**. The project includes various utilities for generating synthetic data, training the model, and evaluating its performance.
 
 ## Requirements
 
