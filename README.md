@@ -79,7 +79,7 @@ python VTD_training.py --dataset=syn --task=5 --cuda=0 --resume=0
 Once training is complete, you can evaluate the model using PEHE and eATE metrics. Use the following command to perform inference on the synthetic dataset:
 
 ```bash
-python VTD_inference.py --task=6
+python VTD_evaluation.py --task=6
 ```
 
 - `--task=5`: Specifies the task for which you want to run the inference.
