@@ -60,117 +60,152 @@ class VTD(nn.Module):
     cf_outcomes_t3 (5000, 30, 1)
     '''
     def __init__(self, input_dim, hidden_dim, latent_dim, output_dim, treatment_dim,head,length):
-        super(VTD, self).__init__()
-        # Embedding layer to transform input_dim to hidden_dim
-        self.latent_dim=latent_dim
-        self.embedding = nn.Sequential(
-                        nn.Linear(input_dim,hidden_dim),
-                        PositionalEncoding(d_model=hidden_dim, dropout=0.1, max_len=length)
-                        )
-        # Encoder network
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=head)
-        self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=6)
-        self.treatment_dim=treatment_dim
-        self.fc_enc = nn.Linear(hidden_dim * 2, hidden_dim * 2)
-        self.bn_enc = nn.BatchNorm1d(hidden_dim * 2)##for rapid converge
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.3) ##avoid over fitting
-        self.Softplus = nn.Softplus()
-        
-        self.fc_mu = nn.Linear(hidden_dim * 2, latent_dim)  # Mapping hidden states (h_t and h_t-1) to μ
-        self.fc_logvar = nn.Linear(hidden_dim * 2, latent_dim)  # Mapping hidden states (h_t and h_t-1) to log(Σ)
-        self.expand_t=nn.Linear(treatment_dim, latent_dim)
-        # Decoder network
-        self.decoder_layer = nn.TransformerDecoderLayer(d_model=latent_dim, nhead=4)
-        self.decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=6)
-        self.fc_de = nn.Linear(hidden_dim, latent_dim)
-        self.fc_reconstruct = nn.Linear(latent_dim, input_dim)
-        
-        # ITE estimation block
-        self.fc_treatment = nn.Linear(latent_dim, treatment_dim)
-        self.fc_outcome = nn.Sequential(
-                        nn.Linear(latent_dim, latent_dim//2),
-                        nn.ReLU(),
-                        nn.Dropout(0.3),
-                        nn.Linear(latent_dim //2, output_dim),   
-                                    )
-    def encode(self, x, delta_t,varing_length):        
-        x = x.transpose(0, 1)        
-        x = self.embedding(x)
-        
-        batch_size = x.size(1)
-        sequence_length = x.size(0)
-
-    # Create masks based on the activate tensor
-        padding_mask = torch.arange(sequence_length).expand(batch_size, sequence_length).cuda() >= varing_length.unsqueeze(1)
+    super(VTD, self).__init__()
+    # Embedding layer to transform input_dim to hidden_dim
+    self.latent_dim=latent_dim
+    self.embedding = nn.Sequential(
+                    nn.Linear(input_dim+treatment_dim,hidden_dim),
+                    #nn.Embedding(num_embeddings=input_dim, embedding_dim=hidden_dim),
+                    PositionalEncoding(d_model=hidden_dim, dropout=0.1, max_len=length)
+                    )
+    # Encoder network
+    self.encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=head)
+    self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=6)
+    self.treatment_dim=treatment_dim
+    self.fc_enc = nn.Linear(hidden_dim * 2, hidden_dim * 2)
+    self.bn_enc = nn.BatchNorm1d(hidden_dim * 2)##for rapid converge
+    self.relu = nn.ReLU()
+    self.dropout = nn.Dropout(0.3) ##avoid over fitting
+    self.Softplus = nn.Softplus()
     
-        delta_t=delta_t.transpose(0, 1) # Transpose to [sequence_length, batch_size, input_dim]
-
-        hidden_states = self.encoder(x,src_key_padding_mask=padding_mask)  # Encoder output shape: [sequence_length, batch_size, hidden_dim]
-        
-        # Prepare h_t and h_t-1 for each time step
-        zero_state = torch.zeros(1, hidden_states.size(1), hidden_states.size(2), device=hidden_states.device)
-        h_t_minus_1 = torch.cat([zero_state, hidden_states[:-1]], dim=0)  # Add zero state at the beginning
-        delta_t_expanded=delta_t.expand_as(h_t_minus_1)
-        #print(delta_t_expanded.shape,h_t_minus_1.shape)
-        assert delta_t_expanded.shape == h_t_minus_1.shape, "Shape mismatch between delta_t_expanded and h_t_minus_1"
-        h_t_minus_1 = h_t_minus_1 * torch.exp(-delta_t_expanded)
-        
-        # Concatenate h_t and h_t-1
-        h_concat = torch.cat([hidden_states, h_t_minus_1], dim=-1)  # Shape: [sequence_length, batch_size, hidden_dim*2]
-
-        # Flatten the concatenated hidden states for each timestep
-        h_concat_flat = h_concat.reshape(-1, h_concat.size(-1))  # Shape: [sequence_length * batch_size, hidden_dim*2]
-        
-        # Fusion
-        h_concat_flat = self.fc_enc(h_concat_flat)
-        h_concat_flat = self.bn_enc(h_concat_flat) 
-        h_concat_flat = self.relu(h_concat_flat)
-        h_concat_flat = self.dropout(h_concat_flat) ## add dropbox
-        
-        # Map to latent parameters μ and log(Σ)
-        mu = self.fc_mu(h_concat_flat)  # Shape: [sequence_length * batch_size, latent_dim]
-        logvar = self.fc_logvar(h_concat_flat)  # Shape: [sequence_length * batch_size, latent_dim]
-        logvar = self.Softplus(logvar)
-        
-        # Reshape back to [sequence_length, batch_size, latent_dim]
-        mu = mu.reshape(hidden_states.size(0), hidden_states.size(1), -1)  # Shape: [sequence_length, batch_size, latent_dim]
-        logvar = logvar.reshape(hidden_states.size(0), hidden_states.size(1), -1)  # Shape: [sequence_length, batch_size, latent_dim]
-        
-        return mu, logvar, hidden_states
+    self.fc_mu = nn.Linear(hidden_dim * 2, latent_dim)  # Mapping hidden states (h_t and h_t-1) to μ
+    self.fc_logvar = nn.Linear(hidden_dim * 2, latent_dim)  # Mapping hidden states (h_t and h_t-1) to log(Σ)
+    self.expand_t=nn.Linear(treatment_dim, latent_dim)
+    # Decoder network
+    self.decoder_layer = nn.TransformerDecoderLayer(d_model=latent_dim, nhead=4)
+    self.decoder = nn.TransformerDecoder(self.decoder_layer, num_layers=6)
+    self.fc_de = nn.Linear(hidden_dim, latent_dim)
+    self.fc_reconstruct = nn.Linear(latent_dim, input_dim)
     
-    def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std)
-        return mu + eps * std
+    # ITE estimation block
+    self.fc_treatment = nn.Linear(latent_dim+treatment_dim, treatment_dim)
+    self.fc_outcome = nn.Sequential(
+                    nn.Linear(latent_dim, latent_dim//2),
+                    #nn.BatchNorm1d(latent_dim + treatment_dim//2),  #n c l
+                    nn.ReLU(),
+                    nn.Dropout(0.3),
+                    nn.Linear(latent_dim //2, output_dim),   
+                                )
+    #self.fc_outcome_simple=nn.Linear(latent_dim, output_dim)
+def encode(self, x, delta_t,t_true,varing_length):
     
-    def decode(self, z, memory):
-        hidden_states = self.decoder(z, memory)  # Decoder output shape: [sequence_length, batch_size, latent_dim]
-        hidden_states = self.fc_de(hidden_states)
-        hidden_states = self.relu(hidden_states)
-        
-        x_recon = self.fc_reconstruct(hidden_states)  
-        return x_recon.transpose(0, 1) 
-
-    def forward(self, x, delta_t,t_true,varing_length):
-        mu, logvar, memory = self.encode(x, delta_t,varing_length)
-        z = self.reparameterize(mu, logvar) 
-        x_recon = self.decode(z, memory)
-        
-        treatment_pred = torch.sigmoid(self.fc_treatment(z))
-        
-        attention = AttentionMechanism(d_model=self.latent_dim, d_treatment=self.treatment_dim)
-        attention.cuda()
-        
-        z_with_truet, attn_weights = attention(z, t_true.transpose(0, 1))
-        outcome_pred = self.fc_outcome(z_with_truet)
-        #------------------------------------------------------
-        treatment_pred = treatment_pred.transpose(0, 1) # [batch, seq, treatment_dim]
-        outcome_pred = outcome_pred.transpose(0, 1) # [batch, seq, output_dim]
-
-        
-        return x_recon, mu, logvar, treatment_pred, outcome_pred
+    zero_state_t = torch.zeros(t_true.size(0), 1, t_true.size(2), device=t_true.device)
+    t_true_minus_1 = torch.cat((zero_state_t, t_true[:,:-1,:]), dim=1) 
     
+    x=torch.cat((x,t_true_minus_1),dim=2)
+    
+    x = x.transpose(0, 1)
+    
+    x = self.embedding(x)
+    
+      # Transpose to [sequence_length, batch_size, input_dim]
+    #mask for attentsion
+    batch_size = x.size(1)
+    sequence_length = x.size(0)
+
+# Create masks based on the activate tensor
+    padding_mask = torch.arange(sequence_length).expand(batch_size, sequence_length).cuda() >= varing_length.unsqueeze(1)
+
+    delta_t=delta_t.transpose(0, 1) # Transpose to [sequence_length, batch_size, input_dim]
+
+    hidden_states = self.encoder(x,src_key_padding_mask=padding_mask)  # Encoder output shape: [sequence_length, batch_size, hidden_dim]
+    
+    # Prepare h_t and h_t-1 for each time step
+    zero_state = torch.zeros(1, hidden_states.size(1), hidden_states.size(2), device=hidden_states.device)
+    h_t_minus_1 = torch.cat([zero_state, hidden_states[:-1]], dim=0)  # Add zero state at the beginning
+    delta_t_expanded=delta_t.expand_as(h_t_minus_1)
+    #print(delta_t_expanded.shape,h_t_minus_1.shape)
+    assert delta_t_expanded.shape == h_t_minus_1.shape, "Shape mismatch between delta_t_expanded and h_t_minus_1"
+    h_t_minus_1 = h_t_minus_1 * torch.exp(-delta_t_expanded)
+    
+    # Concatenate h_t and h_t-1
+    h_concat = torch.cat([hidden_states, h_t_minus_1], dim=-1)  # Shape: [sequence_length, batch_size, hidden_dim*2]
+
+    # Flatten the concatenated hidden states for each timestep
+    h_concat_flat = h_concat.reshape(-1, h_concat.size(-1))  # Shape: [sequence_length * batch_size, hidden_dim*2]
+    
+    # Fusion
+    h_concat_flat = self.fc_enc(h_concat_flat)
+    h_concat_flat = self.bn_enc(h_concat_flat) 
+    h_concat_flat = self.relu(h_concat_flat)
+    h_concat_flat = self.dropout(h_concat_flat) ## add dropbox
+    
+    # Map to latent parameters μ and log(Σ)
+    mu = self.fc_mu(h_concat_flat)  # Shape: [sequence_length * batch_size, latent_dim]
+    logvar = self.fc_logvar(h_concat_flat)  # Shape: [sequence_length * batch_size, latent_dim]
+    logvar = self.Softplus(logvar)
+    
+    # Reshape back to [sequence_length, batch_size, latent_dim]
+    mu = mu.reshape(hidden_states.size(0), hidden_states.size(1), -1)  # Shape: [sequence_length, batch_size, latent_dim]
+    logvar = logvar.reshape(hidden_states.size(0), hidden_states.size(1), -1)  # Shape: [sequence_length, batch_size, latent_dim]
+    
+    return mu, logvar, hidden_states
+
+def reparameterize(self, mu, logvar):
+    std = torch.exp(0.5 * logvar)
+    eps = torch.randn_like(std)
+    return mu + eps * std
+
+def decode(self, z, memory):
+    hidden_states = self.decoder(z, memory)  # Decoder output shape: [sequence_length, batch_size, latent_dim]
+    hidden_states = self.fc_de(hidden_states)
+    hidden_states = self.relu(hidden_states)
+    
+    x_recon = self.fc_reconstruct(hidden_states)  # Shape: [sequence_length, batch_size, input_dim]
+    return x_recon.transpose(0, 1)  # Transpose back to [batch_size, sequence_length, input_dim]
+
+def forward(self, x, delta_t,t_true,varing_length):
+    mu, logvar, memory = self.encode(x, delta_t,t_true,varing_length)
+    z = self.reparameterize(mu, logvar) 
+    x_recon = self.decode(z, memory)
+    
+    
+    zero_state_t = torch.zeros(t_true.size(0), 1, t_true.size(2), device=t_true.device)
+    t_true_minus_1 = torch.cat((zero_state_t, t_true[:,:-1,:]), dim=1)
+    t_true_minus_1 = t_true_minus_1.transpose(0, 1)
+    z_t=torch.cat((z,t_true_minus_1),dim=2)
+    treatment_pred = torch.sigmoid(self.fc_treatment(z_t))
+    
+    #t_pred_expand=self.expand_t(treatment_pred)
+    #t_true_expand=self.expand_t(t_true.transpose(0, 1))
+    
+    #if =='atten'
+    attention = AttentionMechanism(d_model=self.latent_dim, d_treatment=self.treatment_dim)
+    attention.cuda()
+    
+    z_with_truet, attn_weights = attention(z, t_true.transpose(0, 1))
+    z_with_predt, attn_weights = attention(z, treatment_pred)
+    
+    #if mode_train:
+    #    if np.random.rand()>0.5:
+    #        outcome_pred_wtreat = self.fc_outcome(z+t_true_expand)
+    #    else:
+    #        outcome_pred_wtreat = self.fc_outcome(z+t_pred_expand)
+    #elif not mode_train:         
+        #outcome_pred_wtreat = self.fc_outcome(z+t_true_expand)
+
+    
+    #print(torch.cat((z, treatment_pred), dim=-1).shape) #[21, 64, 130] #ncl
+    #------------------------------------------------------
+    outcome_pred = self.fc_outcome(z_with_predt)
+    outcome_pred_wtreat = self.fc_outcome(z_with_truet)
+    #------------------------------------------------------
+    treatment_pred = treatment_pred.transpose(0, 1) # [batch, seq, treatment_dim]
+    outcome_pred = outcome_pred.transpose(0, 1) # [batch, seq, output_dim]
+    outcome_pred_wtreat = outcome_pred_wtreat.transpose(0, 1) # [batch, seq, output_dim]
+    
+    return x_recon, mu, logvar, treatment_pred, outcome_pred, outcome_pred_wtreat
+  
 def loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,varing_length,alpha):
     batch_size = x.size(0)
     sequence_length = x.size(1)
