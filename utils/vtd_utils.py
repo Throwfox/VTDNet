@@ -195,3 +195,51 @@ def evaluate_syn(model,dataset_name, test_loader):
 
     
     return all_predicted_outcomes,all_true_outcomes,all_masks,ite_samples_ori
+    
+def IF_PEHE_estimation(mu0_model, mu1_model, pi_model, Xtest, Ytest, Wtest, cate_estimate):
+    """
+    Perform full PEHE estimation using plugin estimation and first-order influence function.
+
+    Parameters:
+        mu0_model: model to predict E[Y(0) | X]
+        mu1_model: model to predict E[Y(1) | X]
+        pi_model: propensity score model (must support predict_proba)
+        Xtest: feature matrix
+        Ytest: observed outcomes
+        Wtest: treatment indicators (0 or 1)
+        cate_estimate: CATE estimate (e.g., from meta-learner)
+
+    Returns:
+        pehe_estimate: estimated PEHE with correction
+        cate_scaled: scaled CATE estimate (0.01 * original)
+    """
+
+    # Step 1: Plug-in estimation
+    mu0 = mu0_model.predict(Xtest)
+    mu1 = mu1_model.predict(Xtest)
+
+    mu0_scaled = 0.01 * mu0
+    mu1_scaled = 0.01 * mu1
+    cate_scaled = 0.01 * cate_estimate
+    Y_scaled = 0.01 * Ytest
+
+    # Plugin PEHE
+    plugin_pehe = (cate_scaled - (mu1_scaled - mu0_scaled)) ** 2
+
+    # Step 2: Influence Function
+    pi = pi_model.predict_proba(Xtest)[:, 1]
+    A = Wtest - pi
+    B = 2 * Wtest * (Wtest - pi) * (1 / (pi * (1 - pi)))
+    T = mu1_scaled - mu0_scaled
+
+    influence_func = (
+        (1 - B) * (T**2)
+        + B * (Y_scaled * (T - cate_scaled))
+        - A * (T - cate_scaled) ** 2
+        + cate_scaled ** 2
+    )
+
+    # Final PEHE estimate
+    ifpehe_estimate = plugin_pehe + influence_func
+
+    return ifpehe_estimate
