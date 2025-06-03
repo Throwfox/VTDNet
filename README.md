@@ -87,6 +87,12 @@ python VTD_evaluation.py --task=6
 
 The results will be printed to the console, and relevant metrics such as PEHE and eATE will be computed.
 
+### 4. Baselines
+R-MSN: https://github.com/sjblim/rmsn_nips_2018
+TSD: https://github.com/ioanabica/Time-Series-Deconfounder
+DSW: https://github.com/ruoqi-liu/DSW
+
+
 ## Additional Options
 
 - **Checkpointing**: The training script automatically saves model checkpoints during training. To resume training, you can use the `--resume=1` flag when calling the `VTD_training.py` script.
