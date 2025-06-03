@@ -71,6 +71,7 @@ class VTD(nn.Module):
     '''
     def __init__(self, input_dim, hidden_dim, latent_dim, output_dim, treatment_dim,head,length):
         super(VTD, self).__init__()
+        self.attention = AttentionMechanism(d_model=latent_dim, d_treatment=treatment_dim)
         # Embedding layer to transform input_dim to hidden_dim
         self.latent_dim=latent_dim
         self.embedding = nn.Sequential(
@@ -119,7 +120,7 @@ class VTD(nn.Module):
         x = self.embedding(x)
         
           # Transpose to [sequence_length, batch_size, input_dim]
-        #mask for attentsion
+        #mask for attention
         batch_size = x.size(1)
         sequence_length = x.size(0)
 
@@ -189,12 +190,8 @@ class VTD(nn.Module):
         #t_pred_expand=self.expand_t(treatment_pred)
         #t_true_expand=self.expand_t(t_true.transpose(0, 1))
         
-        #if =='atten'
-        attention = AttentionMechanism(d_model=self.latent_dim, d_treatment=self.treatment_dim)
-        attention.cuda()
-        
-        z_with_truet, attn_weights = attention(z, t_true.transpose(0, 1))
-        z_with_predt, attn_weights = attention(z, treatment_pred)
+        z_with_truet, attn_weights = self.attention(z, t_true.transpose(0, 1))
+        z_with_predt, attn_weights = self.attention(z, treatment_pred)
         
         #if mode_train:
         #    if np.random.rand()>0.5:
