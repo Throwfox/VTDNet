@@ -191,7 +191,7 @@ class VTD(nn.Module):
         #t_true_expand=self.expand_t(t_true.transpose(0, 1))
         
         z_with_truet, attn_weights = self.attention(z, t_true.transpose(0, 1))
-        z_with_predt, attn_weights = self.attention(z, treatment_pred)
+        #z_with_predt, attn_weights = self.attention(z, treatment_pred)
         
         #if mode_train:
         #    if np.random.rand()>0.5:
@@ -204,16 +204,16 @@ class VTD(nn.Module):
         
         #print(torch.cat((z, treatment_pred), dim=-1).shape) #[21, 64, 130] #ncl
         #------------------------------------------------------
-        outcome_pred = self.fc_outcome(z_with_predt)
+        #outcome_pred = self.fc_outcome(z_with_predt)
         outcome_pred_wtreat = self.fc_outcome(z_with_truet)
         #------------------------------------------------------
         treatment_pred = treatment_pred.transpose(0, 1) # [batch, seq, treatment_dim]
-        outcome_pred = outcome_pred.transpose(0, 1) # [batch, seq, output_dim]
+        #outcome_pred = outcome_pred.transpose(0, 1) # [batch, seq, output_dim]
         outcome_pred_wtreat = outcome_pred_wtreat.transpose(0, 1) # [batch, seq, output_dim]
         
-        return x_recon, mu, logvar, treatment_pred, outcome_pred, outcome_pred_wtreat
+        return x_recon, mu, logvar, treatment_pred, outcome_pred_wtreat
     
-def loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred, outcome_pred_wtreat,varing_length,alpha):
+def loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred_wtreat,varing_length,alpha):
     batch_size = x.size(0)
     sequence_length = x.size(1)
     num_treat=treatment.size(2)
@@ -277,8 +277,8 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         with torch.no_grad():
             for x, delta_t, treatment, outcome,varing_length in tqdm(val_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
-                x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
-                loss, recon_loss ,kl_loss , treatment_loss , outcome_loss,iptw_losses= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,outcome_pred_wtreat,varing_length,alpha)
+                x_recon, mu, logvar, treatment_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
+                loss, recon_loss ,kl_loss , treatment_loss , outcome_loss,iptw_losses= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome,outcome_pred_wtreat,varing_length,alpha)
                 val_loss += loss.item()
                 # Create mask based on activate
                 batch_size = x.size(0)
@@ -310,8 +310,8 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
             x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
             
             optimizer.zero_grad()
-            x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
-            loss, recon_loss ,kl_loss , treatment_loss , outcome_loss,iptw_losses= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,outcome_pred_wtreat,varing_length,alpha)
+            x_recon, mu, logvar, treatment_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
+            loss, recon_loss ,kl_loss , treatment_loss , outcome_loss,iptw_losses= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome,outcome_pred_wtreat,varing_length,alpha)
             loss.backward()
             #---------------------------------
             torch.nn.utils.clip_grad_norm_(model.parameters(), 20)
@@ -338,7 +338,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         with torch.no_grad():
             for x, delta_t, treatment, outcome,varing_length in tqdm(val_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
-                x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
+                x_recon, mu, logvar, treatment_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
                 loss, recon_loss ,kl_loss , treatment_loss , outcome_loss,iptw_losses= loss_function(x, x_recon, mu, logvar, treatment, treatment_pred, outcome, outcome_pred,outcome_pred_wtreat,varing_length,alpha)
                 val_loss += loss.item()
                 
@@ -388,7 +388,7 @@ def trainer(model, train_loader, val_loader,test_loader, optimizer, num_epochs,a
         with torch.no_grad():
             for x, delta_t, treatment, outcome,varing_length in tqdm(test_loader):
                 x, delta_t, treatment, outcome,varing_length = Variable(x).cuda(), Variable(delta_t).cuda(), Variable(treatment).cuda(), Variable(outcome).cuda(),Variable(varing_length).cuda()
-                x_recon, mu, logvar, treatment_pred, outcome_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
+                x_recon, mu, logvar, treatment_pred,outcome_pred_wtreat = model(x, delta_t,treatment,varing_length)
                 
                 # Create mask based on activate
                 batch_size = x.size(0)
