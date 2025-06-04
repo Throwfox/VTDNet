@@ -31,9 +31,8 @@ class CustomDataset_syn(Dataset):
         return x, delta_t, treatment, outcome, varing_length, cf1, cf2, cf3
 
 def get_syndata_splits(dataset, train_index, val_index, test_index):
-    dataset_keys = ['covariates', 'confounders', 'treatments', 
-                    'outcomes', 'cf_outcomes_t1', 'cf_outcomes_t2', 'cf_outcomes_t3']
 
+    dataset_keys = ['covariates', 'confounders','treatments', 'factual_outcomes','cf_outcomes_t1','cf_outcomes_t2', 'cf_outcomes_t3']
     dataset_train = dict()
     dataset_val = dict()
     dataset_test = dict()
@@ -42,14 +41,12 @@ def get_syndata_splits(dataset, train_index, val_index, test_index):
         dataset_val[key] = dataset[key][val_index, :, :]
         dataset_test[key] = dataset[key][test_index, :, :]
 
-    _, length, num_covariates = dataset_train['covariates'].shape
-
     key = 'sequence_length'
     dataset_train[key] = dataset[key][train_index]
     dataset_val[key] = dataset[key][val_index]
     dataset_test[key] = dataset[key][test_index]
 
-    return dataset_train, dataset_val, dataset_test
+    return dataset_train,dataset_val,dataset_test
 
 def loader_all(dataset, task, batch_size):
 
