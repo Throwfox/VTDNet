@@ -92,6 +92,8 @@ The results will be printed to the console, and relevant metrics such as PEHE an
 - TSD: https://github.com/ioanabica/Time-Series-Deconfounder
 - DSW: https://github.com/ruoqi-liu/DSW
 
+### 5. Examples
+Please take 'VTD_experiments.ipynb' as an example.
 
 ## Additional Options
 
