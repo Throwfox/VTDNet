@@ -115,5 +115,5 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 For any questions or issues, please contact:
 
 - **Hao Dai**
-- Email: haodai@ufl.edu
+- Email: daihao@iu.edu
 ```
